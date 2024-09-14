@@ -1,0 +1,63 @@
+services:
+  nginx:
+    container_name: nginx_container
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports: 
+      - "8080:80"
+    networks:
+      - internal
+    volumes:
+      - ./src/:/var/www/html/
+      - ./logs/nginx:/var/log/nginx/
+
+  php:
+    container_name: php_container
+    image: php:fpm-alpine
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./src/:/var/www/html/
+      - ./logs/php.log:/var/log/fpm-php.www.log
+    ports:
+      - "9000:9000"
+
+  mysql:
+    container_name: mysql_container
+    image: mysql:5.7
+    networks:
+      - internal
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_TCP_PORT: 3306
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  rabbitmq:
+    container_name: rabbitmq_container
+    image: rabbitmq:3-management
+    networks:
+      - internal
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+  
+networks:
+  internal:
+    driver: bridge
