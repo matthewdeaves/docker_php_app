@@ -1,31 +1,4 @@
 services:
-  nginx:
-    container_name: nginx_container
-    build:
-      context: .
-      dockerfile: docker/nginx/Dockerfile
-    ports: 
-      - "8080:80"
-    networks:
-      - internal
-    volumes:
-      - ./src/:/var/www/html/
-      - ./logs/nginx:/var/log/nginx/
-
-  php:
-    container_name: php_container
-    image: php:fpm-alpine
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
-    networks:
-      - internal
-    volumes:
-      - ./src/:/var/www/html/
-      - ./logs/php.log:/var/log/fpm-php.www.log
-    ports:
-      - "9000:9000"
-
   mysql:
     container_name: mysql_container
     image: mysql:5.7
@@ -53,6 +26,33 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: password
+
+  nginx:
+    container_name: nginx_container
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    ports: 
+      - "8080:80"
+    networks:
+      - internal
+    volumes:
+      - ./src/:/var/www/html/
+      - ./logs/nginx:/var/log/nginx/
+
+  php:
+    container_name: php_container
+    image: php:fpm-alpine
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./src/:/var/www/html/
+      - ./logs/php.log:/var/log/fpm-php.www.log
+    ports:
+      - "9000:9000"
 
 volumes:
   mysql_data:
