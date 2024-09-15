@@ -1,0 +1,1 @@
+docker-compose down -v && docker image prune -a && docker compose up --build --force-recreate --remove-orphans
