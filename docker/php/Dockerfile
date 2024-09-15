@@ -12,8 +12,7 @@ RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
     phpize && \
     ./configure && \
     make && \
-    make install && \
-    apk del git
+    make install
 
 RUN docker-php-ext-install mysqli pdo pdo_mysql bcmath sockets intl
 
