@@ -1,25 +1,29 @@
-FROM php:fpm-alpine
+#Use base php 8.3-fpm image
+FROM php:8.2-fpm
 
-RUN apk add --update --no-cache autoconf git gcc make build-base pkgconfig imagemagick-dev icu-dev libintl linux-headers
+#Update sources and upgrade software
+RUN apt-get update && \
+apt-get upgrade -y
 
-RUN rm -rf /tmp/imagick
+#Install image magick
+RUN apt-get install imagemagick -y
 
-RUN git clone https://github.com/Imagick/imagick.git --depth 1 /tmp/imagick && \
-    cd /tmp/imagick && \
-    git fetch origin master && \
-    git switch master && \
-    cd /tmp/imagick && \
-    phpize && \
-    ./configure && \
-    make && \
-    make install
+#Install tools needed to compile PHP modules
+RUN apt-get install \
+autoconf \
+zlib1g-dev \
+libpng-dev \
+libicu-dev \
+git \
+gcc \
+wget \
+make -y
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql bcmath sockets intl
+#Use built in docker helper to install most PHP modules
+RUN docker-php-ext-install intl sockets bcmath mysqli pdo_mysql
 
-RUN docker-php-ext-enable imagick pdo_mysql bcmath sockets intl
+#Install a script that makes installing PHP extensions easier
+ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-# Install and run Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-WORKDIR /var/www/html
-COPY . .
-RUN composer install
+#Use it to install image magic module from source
+RUN install-php-extensions https://github.com/Imagick/imagick/archive/refs/tags/3.7.0.tar.gz
